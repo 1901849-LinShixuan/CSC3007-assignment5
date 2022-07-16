@@ -6,8 +6,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.css" />
     <style>
         #map {
-            width: 1000px;
-            height: 600px;
+            width: 100%;
+            height: 800px;
+        }
+        html, body{
+            margin: 0;
+            padding: 0;
         }
     </style>
 
@@ -38,8 +42,8 @@
         //let tiles = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
         let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
             detectRetina: true,
-            maxZoom: 18,
-            minZoom: 11,
+            maxZoom: 100,
+            //minZoom: 11,
             //Do not remove this attribution
             attribution: '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
                 'New OneMap | Map data © contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>'
@@ -47,8 +51,8 @@
 
         // Generate Map
         let map = new L.Map("map", {
-            center: [1.347833, 103.809357],
-            zoom: 11,
+            center: [1.357833, 103.809357],
+            zoom: 12,
             maxBounds: L.latLngBounds(L.latLng(1.1, 103.5), L.latLng(1.5, 104.3))
         })
             .addLayer(tiles);
@@ -103,9 +107,9 @@
             for (var i = 0; i < locations.length; i++) {
                 circle = new L.circle([locations[i][1], locations[i][2]], {
                     color: color_psi(psi_readings[i][0]),
-                    fillOpacity: 0.7,
+                    fillOpacity: 0.4,
                     weight: 1,
-                    radius: 500
+                    radius: 2500
                 }).addTo(map);
             }
         }
