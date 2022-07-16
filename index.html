@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.css" />
+    <style>
+        #map {
+            width: 1000px;
+            height: 600px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.js"></script>
+    <script>
+        // api url
+        const api_url =
+            "https://api.data.gov.sg/v1/environment/psi";
+
+        // Defining async function
+        async function getapi(url) {
+
+            // Storing response
+            const response = await fetch(url);
+
+            // Storing data in form of JSON
+            var data = await response.json();
+            console.log(data);
+            show(data)
+        }
+        // Calling that async function
+        getapi(api_url);
+
+        //let tiles = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
+            detectRetina: true,
+            maxZoom: 18,
+            minZoom: 11,
+            //Do not remove this attribution
+            attribution: '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
+                'New OneMap | Map data © contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>'
+        });
+
+        // Generate Map
+        let map = new L.Map("map", {
+            center: [1.347833, 103.809357],
+            zoom: 11,
+            maxBounds: L.latLngBounds(L.latLng(1.1, 103.5), L.latLng(1.5, 104.3))
+        })
+            .addLayer(tiles);
+
+        // Define Location Coordinates
+        function show(data) {
+
+            // define locations
+            let west = data.region_metadata[0];
+            let east = data.region_metadata[2];
+            let central = data.region_metadata[3];
+            let south = data.region_metadata[4];
+            let north = data.region_metadata[5];
+
+            var locations = [
+                [west.name, west.label_location.latitude, west.label_location.longitude],
+                [east.name, east.label_location.latitude, east.label_location.longitude],
+                [central.name, central.label_location.latitude, central.label_location.longitude],
+                [south.name, south.label_location.latitude, south.label_location.longitude],
+                [north.name, north.label_location.latitude, north.label_location.longitude],
+            ];
+
+            // Get 24hour PSI reading
+            let psi = data.items[0].readings.psi_twenty_four_hourly;
+
+            var psi_readings = [
+                [psi.west],
+                [psi.east],
+                [psi.central],
+                [psi.south],
+                [psi.north],
+            ];
+
+            // Add Marker + Tooltip
+            for (var i = 0; i < locations.length; i++) {
+                marker = new L.marker([locations[i][1], locations[i][2]])
+                    .bindPopup(locations[i][0] + ", PSI = " + psi_readings[i][0])
+                    .addTo(map);
+            }
+
+            // Add Dynamic Color to Area Circle
+            function color_psi(x) {
+                if (x < 30) {
+                    return "green"
+                }
+                if (x > 30) {
+                    return "yellow"
+                }
+            }
+
+            // Add Area Circle
+            for (var i = 0; i < locations.length; i++) {
+                circle = new L.circle([locations[i][1], locations[i][2]], {
+                    color: color_psi(psi_readings[i][0]),
+                    fillOpacity: 0.7,
+                    weight: 1,
+                    radius: 500
+                }).addTo(map);
+            }
+        }
+
+    </script>
+
+
+</body>
+
+</html>
